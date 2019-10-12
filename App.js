@@ -35,6 +35,14 @@ const deleteTodoMutation = gql`
   }
 `;
 
+const updateTodoMutation = gql`
+  mutation UpdateTodo($id: ID!, $isFinished: Boolean!) {
+    updateTodo(id: $id, isFinished: $isFinished) {
+      id
+    }
+  }
+`;
+
 class App extends Component {
 
   constructor(props) {
@@ -171,13 +179,45 @@ class App extends Component {
     </TouchableOpacity>
   );
 
+  toggleFinished = (id, isFinished) => {
+    client.mutate({
+      mutation: updateTodoMutation,
+      variables: {
+        id: id,
+        isFinished: isFinished
+      }
+    })
+      .then(result => {
+        // reload data
+        this.loadData();
+      })
+      .catch(error => console.log(error));
+  };
+
   renderItem = (item) => {
     return (
       <View style={{ flexDirection: 'row', paddingHorizontal: 20 }}>
 
+        <TouchableOpacity
+          style={{ alignSelf: 'center' }}
+          onPress={() => this.toggleFinished(item.id, !item.isFinished)}
+        >
+          <Image
+            style={{ width: 24, height: 24 }}
+            source={item.isFinished ? require('./icons/finished.png') : require('./icons/unfinished.png')}
+          />
+        </TouchableOpacity>
+
         <View style={styles.list}>
-          <Text style={{ fontSize: 15, fontWeight: '500' }}>{item.title}</Text>
-          <Text>{item.content}</Text>
+
+          <Text style={{ fontSize: 15, fontWeight: '500', textDecorationLine: item.isFinished ? 'line-through' : 'none' }}>
+            {item.title}
+          </Text>
+
+          <Text style={{ textDecorationLine: item.isFinished ? 'line-through' : 'none' }}>
+            {item.content}
+          </Text>
+
         </View>
 
         {this.renderDeleteButton(item)}
