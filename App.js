@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, FlatList } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
 import ApolloClient, { gql } from 'apollo-boost';
 
 const client = new ApolloClient({
@@ -23,7 +23,8 @@ class App extends Component {
     super(props);
 
     this.state = {
-      todoList: []
+      todoList: [],
+      showModal: false
     }
   }
 
@@ -48,13 +49,20 @@ class App extends Component {
     });
   }
 
+  renderCreateNewButton = () => (
+    <TouchableOpacity
+      style={styles.addButton}
+      onPress={() => this.setState({ showModal: true })}
+    >
+      <Text style={styles.textButton}>Create New +</Text>
+    </TouchableOpacity>
+  );
+
   renderItem = (item) => {
     return (
-      <View style={{ flexDirection: 'column', flex: 1, marginHorizontal: 20, marginVertical: 10 }}>
-
+      <View style={styles.list}>
         <Text style={{ fontSize: 15, fontWeight: '500' }}>{item.title}</Text>
         <Text>{item.content}</Text>
-
       </View>
     );
   };
@@ -63,6 +71,9 @@ class App extends Component {
     return (
       <View style={styles.container}>
         <Text style={styles.header}>Todo List</Text>
+
+        {this.renderCreateNewButton()}
+
         <FlatList
           data={this.state.todoList}
           renderItem={({ item }) => this.renderItem(item)}
@@ -86,6 +97,22 @@ const styles = StyleSheet.create({
     fontSize: 18,
     textAlign: 'center'
   },
+  addButton: {
+    flexDirection: 'row',
+    justifyContent: 'center',
+    marginVertical: 20
+  },
+  textButton: {
+    color: '#5cbcf4',
+    fontSize: 16,
+    fontWeight: '500'
+  },
+  list: {
+    flexDirection: 'column',
+    flex: 1,
+    marginHorizontal: 20,
+    marginVertical: 10
+  }
 });
 
 export default App;
