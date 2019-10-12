@@ -1,5 +1,7 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Modal, TextInput, Image, Alert } from 'react-native';
+import {
+  StyleSheet, Text, View, FlatList, TouchableOpacity, Modal, TextInput, Image, Alert, RefreshControl, ScrollView
+} from 'react-native';
 import ApolloClient, { gql } from 'apollo-boost';
 
 const client = new ApolloClient({
@@ -52,7 +54,8 @@ class App extends Component {
       todoList: [],
       showModal: false,
       title: '',
-      content: ''
+      content: '',
+      refreshing: false
     }
   }
 
@@ -69,7 +72,8 @@ class App extends Component {
       console.log(result.data);
 
       this.setState({
-        todoList: result.data.allTodoes
+        todoList: result.data.allTodoes,
+        refreshing: false
       })
     })
     .catch(error => {
@@ -246,6 +250,11 @@ class App extends Component {
     );
   };
 
+  onRefresh = () => {
+    this.setState({ refreshing: true });
+    this.loadData();
+  };
+
   render() {
     return (
       <View style={styles.container}>
@@ -253,11 +262,15 @@ class App extends Component {
 
         {this.renderCreateNewButton()}
 
-        <FlatList
-          data={this.state.todoList}
-          renderItem={({ item }) => this.renderItem(item)}
-          keyExtractor={({ item }, index) => index.toString()}
-        />
+        <ScrollView
+          refreshControl={<RefreshControl refreshing={this.state.refreshing} onRefresh={this.onRefresh} />}
+        >
+          <FlatList
+            data={this.state.todoList}
+            renderItem={({ item }) => this.renderItem(item)}
+            keyExtractor={({ item }, index) => index.toString()}
+          />
+        </ScrollView>
 
         {this.renderModal()}
       </View>
