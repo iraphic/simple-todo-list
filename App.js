@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity, Modal, TextInput } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Modal, TextInput, Image, Alert } from 'react-native';
 import ApolloClient, { gql } from 'apollo-boost';
 
 const client = new ApolloClient({
@@ -23,6 +23,14 @@ const createTodoMutation = gql`
       id
       title
       content
+    }
+  }
+`;
+
+const deleteTodoMutation = gql`
+  mutation DeleteTodo($id: ID!) {
+    deleteTodo(id: $id) {
+      id
     }
   }
 `;
@@ -125,11 +133,54 @@ class App extends Component {
     </Modal>
   );
 
+  deleteTodo = (id) => {
+    client.mutate({
+      mutation: deleteTodoMutation,
+      variables: {
+        id: id
+      }
+    })
+    .then(result => {
+      // reload data
+      this.loadData();
+    })
+    .catch(error => console.log(error))
+  };
+
+  showDeleteAlert = (id) => {
+    Alert.alert(
+      'Delete Data',
+      'Are you sure to delete this data',
+      [
+        { text: 'Cancel', style: 'cancel' },
+        { text: 'Delete', onPress: () => this.deleteTodo(id) }
+      ],
+      { cancelable: true }
+    );
+  };
+
+  renderDeleteButton = (item) => (
+    <TouchableOpacity
+      style={{ alignSelf: 'center' }}
+      onPress={() => this.showDeleteAlert(item.id)}
+    >
+      <Image
+        style={{ width: 24, height: 24 }}
+        source={require('./icons/delete.png')}
+      />
+    </TouchableOpacity>
+  );
+
   renderItem = (item) => {
     return (
-      <View style={styles.list}>
-        <Text style={{ fontSize: 15, fontWeight: '500' }}>{item.title}</Text>
-        <Text>{item.content}</Text>
+      <View style={{ flexDirection: 'row', paddingHorizontal: 20 }}>
+
+        <View style={styles.list}>
+          <Text style={{ fontSize: 15, fontWeight: '500' }}>{item.title}</Text>
+          <Text>{item.content}</Text>
+        </View>
+
+        {this.renderDeleteButton(item)}
       </View>
     );
   };
