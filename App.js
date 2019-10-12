@@ -99,6 +99,8 @@ class App extends Component {
     })
     .catch(error => {
       console.log(error);
+
+      this.showErrorAlert();
     });
   };
 
@@ -152,7 +154,22 @@ class App extends Component {
       // reload data
       this.loadData();
     })
-    .catch(error => console.log(error))
+    .catch(error => {
+      console.log(error);
+
+      this.showErrorAlert();
+    })
+  };
+
+  showErrorAlert = () => {
+    Alert.alert(
+      'Error',
+      'There is an error performing your action',
+      [
+        { text: 'OK', style: 'cancel' },
+      ],
+      { cancelable: true }
+    );
   };
 
   showDeleteAlert = (id) => {
@@ -191,7 +208,11 @@ class App extends Component {
         // reload data
         this.loadData();
       })
-      .catch(error => console.log(error));
+      .catch(error => {
+        console.log(error);
+
+        this.showErrorAlert();
+      });
   };
 
   renderItem = (item) => {
