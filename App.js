@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { StyleSheet, Text, View, FlatList, TouchableOpacity } from 'react-native';
+import { StyleSheet, Text, View, FlatList, TouchableOpacity, Modal, TextInput } from 'react-native';
 import ApolloClient, { gql } from 'apollo-boost';
 
 const client = new ApolloClient({
@@ -24,7 +24,9 @@ class App extends Component {
 
     this.state = {
       todoList: [],
-      showModal: false
+      showModal: false,
+      title: '',
+      content: ''
     }
   }
 
@@ -49,6 +51,14 @@ class App extends Component {
     });
   }
 
+  saveTodo = () => {
+    this.setState({
+      showModal: false,
+      title: '',
+      content: ''
+    });
+  };
+
   renderCreateNewButton = () => (
     <TouchableOpacity
       style={styles.addButton}
@@ -56,6 +66,36 @@ class App extends Component {
     >
       <Text style={styles.textButton}>Create New +</Text>
     </TouchableOpacity>
+  );
+
+  renderModal = () => (
+    <Modal visible={this.state.showModal} animationType={'slide'}>
+
+      <Text style={styles.modalTitle}>Add New</Text>
+
+      <TextInput
+        style={styles.input}
+        placeholder={'Input title..'}
+        value={this.state.title}
+        onChangeText={(text) => this.setState({ title: text })}
+      />
+
+      <TextInput
+        style={styles.input}
+        placeholder={'Input content..'}
+        value={this.state.content}
+        onChangeText={(text) => this.setState({ content: text })}
+      />
+
+      <TouchableOpacity style={styles.addButton} onPress={() => this.saveTodo()}>
+        <Text style={styles.textButton}>Create</Text>
+      </TouchableOpacity>
+
+      <TouchableOpacity style={styles.addButton} onPress={() => this.setState({ showModal: false })}>
+        <Text>Cancel</Text>
+      </TouchableOpacity>
+
+    </Modal>
   );
 
   renderItem = (item) => {
@@ -79,6 +119,8 @@ class App extends Component {
           renderItem={({ item }) => this.renderItem(item)}
           keyExtractor={({ item }, index) => index.toString()}
         />
+
+        {this.renderModal()}
       </View>
     );
   }
@@ -112,6 +154,20 @@ const styles = StyleSheet.create({
     flex: 1,
     marginHorizontal: 20,
     marginVertical: 10
+  },
+  modalTitle: {
+    marginVertical: 40,
+    fontWeight: '600',
+    fontSize: 18,
+    textAlign: 'center'
+  },
+  input: {
+    paddingHorizontal: 20,
+    paddingVertical: 15,
+    borderWidth: 1,
+    borderColor: '#dedede',
+    marginVertical: 15,
+    marginHorizontal: 20
   }
 });
 
