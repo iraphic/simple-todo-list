@@ -17,6 +17,16 @@ const todoListQuery = gql`
   }
 `;
 
+const createTodoMutation = gql`
+  mutation CreateTodo($title: String!, $content: String!) {
+    createTodo(title: $title, content: $content) {
+      id
+      title
+      content
+    }
+  }
+`;
+
 class App extends Component {
 
   constructor(props) {
@@ -52,10 +62,27 @@ class App extends Component {
   }
 
   saveTodo = () => {
-    this.setState({
-      showModal: false,
-      title: '',
-      content: ''
+    if (!this.state.title || !this.state.content) return;
+
+    client.mutate({
+      mutation: createTodoMutation,
+      variables: {
+        title: this.state.title,
+        content: this.state.content
+      }
+    })
+    .then(result => {
+      this.setState({
+        showModal: false,
+        title: '',
+        content: ''
+      });
+
+      // reload data
+      this.loadData();
+    })
+    .catch(error => {
+      console.log(error);
     });
   };
 
